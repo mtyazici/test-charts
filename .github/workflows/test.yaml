@@ -1,0 +1,42 @@
+name: Foo
+on:
+  pull_request:
+  pull_request_target:
+  workflow_dispatch:
+  push:
+jobs:
+  foo:
+    # Run workflow pull_request if it is NOT a fork, as pull_request_target if it IS a fork
+    if: >-
+      ( github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.fork == true ) ||
+      ( github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false ) ||
+      ( !(startsWith(github.event_name, 'pull_request')) )
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the merged commit from PR and base branch
+        if: github.event_name == 'pull_request_target'
+        uses: actions/checkout@v2
+        with:
+          # repository: ${{ github.event.pull_request.head.repo.full_name }}
+          # ref: ${{ github.event.pull_request.head.ref }}
+          # ref: refs/pull/${{ github.event.pull_request.number }}/merge
+          ref: refs/pull/${{ github.event.pull_request.number }}/head
+      - name: Checkout the head commit of the branch
+        if: ${{ github.event_name != 'pull_request_target' }}
+        uses: actions/checkout@v2
+
+      - name: debug info
+        run: |
+          echo event name: ${{ github.event_name }}
+          echo repo full name: ${{ github.event.pull_request.head.repo.full_name }}
+          echo repository: ${{ github.repository }}
+          echo fork: ${{ github.event.pull_request.head.repo.fork }}
+          echo repo id: ${{ github.event.pull_request.head.repo.id }}
+          echo base repo id: ${{ github.event.pull_request.base.repo.id }}
+          echo pr base sha: ${{ github.event.pull_request.base.sha }}
+          echo pr head sha: ${{ github.event.pull_request.head.sha }}
+          echo pr merge sha: ${{ github.event.pull_request.merge.sha }}
+          echo git log commit head sha: $(git log -1 --format="%H")
+          printenv
+      - name: foo
+        run: echo "do stuff involving [${{ secrets.Foo }}]"
