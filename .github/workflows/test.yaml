@@ -19,8 +19,8 @@ jobs:
         with:
           # repository: ${{ github.event.pull_request.head.repo.full_name }}
           # ref: ${{ github.event.pull_request.head.ref }}
-          # ref: refs/pull/${{ github.event.pull_request.number }}/merge
-          ref: refs/pull/${{ github.event.pull_request.number }}/head
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
+          # ref: refs/pull/${{ github.event.pull_request.number }}/head
       - name: Checkout the head commit of the branch
         if: ${{ github.event_name != 'pull_request_target' }}
         uses: actions/checkout@v2
@@ -38,5 +38,8 @@ jobs:
           echo pr merge sha: ${{ github.event.pull_request.merge.sha }}
           echo git log commit head sha: $(git log -1 --format="%H")
           printenv
+
+      - name: ls
+        run: ls
       - name: foo
         run: echo "do stuff involving [${{ secrets.Foo }}]"
