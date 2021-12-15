@@ -39,5 +39,8 @@ jobs:
       - name: FORK test
         run: echo "do stuff involving [${{ secrets.Foo }}]"
         
+
+      - name: ls
+        run: ls
       - name: foo
         run: echo "do stuff involving [${{ secrets.Foo }}]"
