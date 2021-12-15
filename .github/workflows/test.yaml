@@ -13,6 +13,11 @@ jobs:
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
+        
       - name: Checkout the merged commit from PR and base branch
         if: github.event_name == 'pull_request_target'
         uses: actions/checkout@v2
