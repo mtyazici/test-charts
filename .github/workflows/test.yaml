@@ -3,33 +3,27 @@ on:
   pull_request:
   pull_request_target:
     types: [labeled]
-  workflow_dispatch:
-  #push:
 jobs:
   foo:
-    # Run workflow pull_request if it is NOT a fork, as pull_request_target if it IS a fork
     if: >-
       (github.event_name == 'pull_request_target' && contains(github.event.pull_request.labels.*.name,'safe-to-test')) ||
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJSON(github) }}
-        run: echo "$GITHUB_CONTEXT"
-        
-      - name: Checkout the merged commit from PR and base branch
-        if: github.event_name == 'pull_request_target'
+      - name: Decide which ref to checkout
+        id: decide-ref
+        run: |
+          if [[ "${{github.event_name}}" == "pull_request" ]]; then
+            echo "::set-output name=ref::${{github.ref}}"
+          else
+            echo "::set-output name=ref::refs/pull/${{ github.event.pull_request.number }}/merge"
+          fi
+
+      - name: Checkout
         uses: actions/checkout@v2
         with:
-          # repository: ${{ github.event.pull_request.head.repo.full_name }}
-          # ref: ${{ github.event.pull_request.head.ref }}
-          # ref: refs/pull/${{ github.event.pull_request.number }}/merge
-          ref: refs/pull/${{ github.event.pull_request.number }}/head
-      - name: Checkout the head commit of the branch
-        if: ${{ github.event_name != 'pull_request_target' }}
-        uses: actions/checkout@v2
-
+          ref: ${{steps.decide-refs.outputs.ref}}
+          
       - name: debug info
         run: |
           echo event name: ${{ github.event_name }}
