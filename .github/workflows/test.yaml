@@ -35,5 +35,9 @@ jobs:
           echo pr merge sha: ${{ github.event.pull_request.merge.sha }}
           echo git log commit head sha: $(git log -1 --format="%H")
           printenv
+          
+      - name: FORK test
+        run: echo "do stuff involving [${{ secrets.Foo }}]"
+        
       - name: foo
         run: echo "do stuff involving [${{ secrets.Foo }}]"
